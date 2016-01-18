@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- HW 7 program build file
+ -->
+    
+    <project name="customer" default="run" basedir="." xmlns:jacoco="antlib:org.jacoco.ant">
+    <property environment="env"/>
+	<taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+	        <classpath path="lib/jacocoant.jar"/>
+	    </taskdef>
+     
+    <property name="classes" location="bin"/>
+     <property name="test.dir" location="test"/>
+     <property name="test.dest.dir" location="test/bin"/>
+    <property name="test.report.dir" location="test/report"/>
+ 
+    <path id="project.classpath">
+        <pathelement location="bin"/>
+    </path>
+    <target name="init" depends="clean">
+        <mkdir dir="${classes}"/>
+        <mkdir dir="${test.dest.dir}"/>
+        <mkdir dir="${test.report.dir}"/>
+         
+    </target>
+    <target name="clean">
+        <delete dir="${classes}"/>
+        <delete dir="${test.dest.dir}"/>
+         
+    </target>
+    <target name="compile" depends="init">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac includeantruntime = "false" destdir="${classes}" debug="on">
+            <src path="src"/>
+             
+            </javac>
+            <javac includeantruntime = "false" destdir="${test.dest.dir}" debug="on">
+                        <src path="test"/>
+                 
+                <classpath>
+                                <pathelement location="lib/junit-4.12-beta-3.jar" />
+                                <pathelement location="lib/hamcrest-core-1.3.jar" />
+                                <pathelement location="${classes}" />
+                                </classpath>  
+             
+        </javac>
+    </target>
+     
+      
+      
+      
+      <target name="junit" depends="compile"> 
+    	<jacoco:coverage destfile="${test.dest.dir}/jacoco.exec">
+            <junit printsummary="yes" showoutput="true" fork="true" outputtoformatters="true" haltonfailure="yes"> 
+             
+                 
+                <classpath>
+                    <pathelement location="${test.dest.dir}" />
+                    <pathelement location="${classes}"/>
+                    <pathelement path="lib/junit-4.12-beta-3.jar"/>
+                    <pathelement location="lib/hamcrest-core-1.3.jar" />
+                </classpath>
+                <formatter type="xml" /> 
+                <batchtest todir="${test.report.dir}" fork="true"> 
+                    <fileset dir="${test.dest.dir}"> 
+                        <include name="**/*Test.class" /> 
+                    </fileset> 
+                </batchtest> 
+            </junit> 
+    		</jacoco:coverage>
+    	<jacoco:report>
+    	        <executiondata>
+    	            <file file="${test.dest.dir}/jacoco.exec" />
+    	        </executiondata>
+    	        <structure name="Report">
+    	            <classfiles>
+    	                <fileset dir="${test.dest.dir}">
+    	                    <include name="**/*.class" />
+    	                    <exclude name= "**/Main.class" />
+    	                </fileset>
+    	            	
+    	            	<fileset dir="${classes}">
+    	            	    <include name="**/*.class" />
+    	            	   	<exclude name= "**/Main.class" />
+    	            	 </fileset>
+    	            	
+    	            </classfiles>
+    	        	 <sourcefiles encoding="UTF-8">
+    	        	      <fileset dir="${test.dir}"/>	 	 
+    	        	 </sourcefiles>
+    	        </structure>
+            <html destdir="${test.report.dir}" />
+        </jacoco:report>
+        </target>
+     
+    <target name="run" depends="junit">
+        <java fork="yes" classname="customer.Main"
+            failonerror="true" dir="${basedir}">
+            <classpath refid="project.classpath"/>
+        </java>
+    </target>
+</project>
